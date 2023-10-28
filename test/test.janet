@@ -39,7 +39,6 @@
         (string/from-bytes ;_)))
 
 (defn assert-hash
-    ""
     [hasher expected &opt flag]
     (def result (as-> (openssl-hash/finalize hasher flag) _
                     (if (= flag :hex) (string/ascii-lower _) _)))
@@ -75,8 +74,29 @@
             (openssl-hash/feed h (string/from-bytes c)))
         (assert-hash h (vec :out) flag)))
 
+(defn feed-single-byte-varargs
+    "Test the hash function by feeding it one byte at a time through varargs"
+    [vec]
+    (each flag [nil :hex]
+        (def h (openssl-hash/new (vec :alg)))
+        (openssl-hash/feed h (splice (map string/from-bytes (string/bytes (vec :in)))))
+        (assert-hash h (vec :out) flag)))
+
 (each vec test-vectors
-    (simple-hash vec))
+    (simple-hash vec)
+    (feed-single-byte vec)
+    (feed-single-byte-varargs vec))
+
+# test zero calls to openssl-hash/feed
+(let [h (openssl-hash/new "SHA256")]
+    (assert-hash h "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"))
+
+# test openssl-hash/feed with no data arguments
+(let [h (openssl-hash/new "SHA256")]
+    (openssl-hash/feed h)
+    (assert-hash h "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"))
+
+# test no args to feed, test no feed call
 
 # test errors
 (assert-error (openssl-hash/new "SHA\x00256")

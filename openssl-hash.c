@@ -112,7 +112,7 @@ static Janet hasher_feed(int32_t argc, Janet *argv) {
         const uint8_t *data;
         int32_t len;
 
-        int success = janet_bytes_view(argv[1], &data, &len);
+        int success = janet_bytes_view(argv[i], &data, &len);
         if (!success)
             janet_panic("cannot read bytes of data argument");
 
