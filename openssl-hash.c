@@ -75,16 +75,15 @@ static Janet hasher_new(int32_t argc, Janet *argv) {
     // convert the name to a null terminated c string
     // janet_smalloc doesn't need a NULL check b/c it includes it's own error
     // handling
-    char *j_alg_cstr = janet_smalloc(j_alg->length);
+    char *j_alg_cstr = janet_smalloc(j_alg->length + 1);
     memcpy(j_alg_cstr, j_alg->data, j_alg->length);
     j_alg_cstr[j_alg->length] = 0;
 
     const EVP_MD *md = EVP_get_digestbyname(j_alg_cstr);
-    janet_sfree(j_alg_cstr);
-
     if (md == NULL) {
         janet_panicf("no digest algorithm with name '%s'", j_alg_cstr);
     }
+    janet_sfree(j_alg_cstr);
 
     EVP_MD_CTX *md_ctx = EVP_MD_CTX_new();
     // unclear to me if this can fail, but just in case

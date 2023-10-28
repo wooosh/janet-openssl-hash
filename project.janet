@@ -4,5 +4,5 @@
 
 (declare-native
     :name "openssl-hash"
-    :lflags ["-lssl" "-lcrypto"]
+    :lflags ["-lcrypto"]
     :source ["openssl-hash.c"])
